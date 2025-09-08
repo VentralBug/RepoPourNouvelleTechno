@@ -66,6 +66,7 @@ def run_linux_commands(client, df, index):
     ram_command = 'free | grep Mem | awk \'{printf "%.2f / %.2f Go\\n", $3/1024/1024, $2/1024/1024}\''
     disk_command = 'daf -h --output=source,used,size | grep -v tmpfs | tail -n +2 | awk \'{print $1 \" \" $2 \"/\" $3 \"Go\"}\''
     user_list_command = "getent passwd | cut -d: -f1 | tr '\n' ',' "
+    list_file_commande = "ls /"
 
     output = ssh_command(client, os_version_command)
     output = output.replace('\n', '')
@@ -87,6 +88,10 @@ def run_linux_commands(client, df, index):
     output = ssh_command(client, user_list_command)
     output = output.rstrip(',')
     df.loc[index,"Utilisateurs"] = output
+
+    output = ssh_command(client, list_file_commande)
+    output = output.rstrip(',')
+    df.loc[index,"Fichiers à la racine"] = output
 
     return df
 
