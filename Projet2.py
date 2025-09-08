@@ -60,42 +60,6 @@ def run_windows_commands(client, df, index):
     return df
 
 
-def run_linux_commands(client, df, index):
-    os_version_command = 'lsb_release -d | cut -f2-'
-    cpu_usage_command = "echo $[100-$(vmstat 1 2|tail -1|awk '{print $15}')]"
-    ram_command = 'free | grep Mem | awk \'{printf "%.2f / %.2f Go\\n", $3/1024/1024, $2/1024/1024}\''
-    disk_command = 'daf -h --output=source,used,size | grep -v tmpfs | tail -n +2 | awk \'{print $1 \" \" $2 \"/\" $3 \"Go\"}\''
-    user_list_command = "getent passwd | cut -d: -f1 | tr '\n' ',' "
-    list_file_commande = "ls /"
-
-    output = ssh_command(client, os_version_command)
-    output = output.replace('\n', '')
-    df.loc[index,"Version OS"] = output
-
-    output = ssh_command(client, cpu_usage_command)
-    output = output.replace('\n', '')
-    df.loc[index,"Charge CPU"] = output
-
-    output = ssh_command(client, ram_command)
-    output = output.replace('\n', '')
-    df.loc[index,"RAM Disponible"] = output
-
-    output = ssh_command(client, disk_command)
-    output = output.replace('\n', '|')
-    output = output.rstrip('|')
-    df.loc[index, "Espace disque disponible"] = output
-
-    output = ssh_command(client, user_list_command)
-    output = output.rstrip(',')
-    df.loc[index,"Utilisateurs"] = output
-
-    output = ssh_command(client, list_file_commande)
-    output = output.rstrip(',')
-    df.loc[index,"Fichiers à la racine"] = output
-
-    return df
-
-
 def ssh_command(client:paramiko.SSHClient(), command:str):
     stdin, stdout, stderr = client.exec_command(command)
     output = str(stdout.read().decode())
@@ -166,8 +130,6 @@ for index, row in df_ordinateurs.iterrows():
     if client is not None:
         if row["Type système"] == "Windows":
             df_ordinateurs = run_windows_commands(client, df_ordinateurs, index)
-        elif row["Type système"] == "Linux":
-            df_ordinateurs = run_linux_commands(client, df_ordinateurs, index)
         else:
             result = None
 
