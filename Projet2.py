@@ -28,6 +28,8 @@ def run_windows_commands(client, df, index):
     ram_command = 'powershell "(Get-WmiObject Win32_OperatingSystem).TotalVisibleMemorySize / 1MB - (Get-WmiObject Win32_OperatingSystem).FreePhysicalMemory / 1MB | ForEach-Object { \\"{0:N2} / {1:N2} Go\\" -f $_, ((Get-WmiObject Win32_OperatingSystem).TotalVisibleMemorySize / 1MB) }"'
     disk_command = 'powershell "Get-PSDrive -PSProvider FileSystem | ForEach-Object {Write-Output \\"$($_.Name): $([math]::round($_.Used / 1GB, 2)) / $([math]::round(($_.Used + $_.Free) / 1GB, 2)) go\\"}"'
     user_list_command = 'powershell "(Get-LocalUser | ForEach-Object { $_.Name }) -join \\",\\""'
+    list_file_command = 'ls c:\\'
+
 
     output = ssh_command(client, os_version_command)
     output =  output.replace('\r\n','')
@@ -49,6 +51,11 @@ def run_windows_commands(client, df, index):
     output = ssh_command(client, user_list_command)
     output = output.replace('\r\n', '')
     df.loc[index, "Utilisateurs"] = output
+
+    output = ssh_command(client, list_file_command)
+    output = output.replace('\r\n', '')
+    df.loc[index, "Fichier"] = output
+
 
     return df
 
@@ -142,6 +149,7 @@ df_ordinateurs["Charge CPU"] = ""
 df_ordinateurs["RAM Disponible"] = ""
 df_ordinateurs["Espace disque disponible"] = ""
 df_ordinateurs["Utilisateurs"] = ""
+df_ordinateurs["Fichiers à la racine"] = ""
 
 
 for index, row in df_ordinateurs.iterrows():
