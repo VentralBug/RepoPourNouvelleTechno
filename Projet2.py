@@ -171,11 +171,11 @@ for index, row in df_ordinateurs.iterrows():
         else:
             result = None
 
-        print_infos(df_ordinateurs,index)
+        # print_infos(df_ordinateurs,index)
 
         ssh_close(client)
     else:
-        print_error(f"Impossible d'établir une connection vers la machine {row["Adresse IP"]}")
+        # print_error(f"Impossible d'établir une connection vers la machine {row["Adresse IP"]}")
         append_logfile(f"Impossible d'établir une connection vers la machine {row["Adresse IP"]}")
 
     df_results = df_ordinateurs
